@@ -1,0 +1,11 @@
+node_modules/
+client/dist/
+.env*
+!.env.example
+*.log
+tmp/
+test-results/
+playwright-report/
+.DS_Store
+*.pdf
+*.bak

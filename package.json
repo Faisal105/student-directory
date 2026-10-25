@@ -1,0 +1,46 @@
+{
+  "name": "student-directory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <27"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"node --env-file-if-exists=.env --watch server/src/index.js\" \"vite --config client/vite.config.js\"",
+    "build": "vite build --config client/vite.config.js",
+    "start": "node --env-file-if-exists=.env server/src/index.js",
+    "test": "node --test server/test/*.test.js",
+    "test:e2e": "playwright test",
+    "db:migrate": "node --env-file-if-exists=.env server/scripts/migrate.js",
+    "db:seed": "node --env-file-if-exists=.env server/scripts/seed.js",
+    "user:create": "node --env-file-if-exists=.env server/scripts/create-user.js",
+    "lint": "eslint .",
+    "db:local": "node server/scripts/local-setup.js",
+    "test:sql": "SQL_INTEGRATION=true node --env-file=.env --test server/test/sql.integration.test.js"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.9.0",
+    "argon2": "^0.44.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "mssql": "^12.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@playwright/test": "^1.56.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.38.0",
+    "globals": "^16.4.0",
+    "prettier": "^3.9.10",
+    "supertest": "^7.1.4",
+    "vite": "^7.1.0"
+  }
+}
