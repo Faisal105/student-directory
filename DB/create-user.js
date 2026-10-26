@@ -1,8 +1,8 @@
 import { input, password, confirm } from "@inquirer/prompts";
 import argon2 from "argon2";
 import sql from "mssql";
-import { email } from "../src/validation.js";
-import { passwordOptions } from "../src/app.js";
+import { email } from "../backend/validation.js";
+import { passwordOptions } from "../backend/app.js";
 import { operator } from "./operator.js";
 const address = email.parse(await input({ message: "Reviewer email:" }));
 const secret = await password({

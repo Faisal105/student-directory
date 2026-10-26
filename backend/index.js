@@ -4,6 +4,10 @@ import { createStore } from "./store.js";
 import { createApp } from "./app.js";
 try {
   const settings = config();
+  settings.serveUI = process.argv.includes("--serve-ui") || settings.production;
+  if (settings.serveUI && !settings.production) {
+    settings.origin = `http://localhost:${settings.port}`;
+  }
   const pool = new sql.ConnectionPool(settings.db);
   pool.on("error", () => console.error("Database pool error"));
   await pool.connect();

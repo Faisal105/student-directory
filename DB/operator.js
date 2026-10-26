@@ -1,5 +1,5 @@
 import sql from "mssql";
-import { config } from "../src/config.js";
+import { config } from "../backend/config.js";
 export async function operator(task) {
   let pool;
   try {

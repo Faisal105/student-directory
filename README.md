@@ -1,59 +1,96 @@
-# Student Directory
+# Student CRUD Application
 
-A small React frontend, Express backend, and Microsoft SQL Server database. Includes student create/read/update/delete and account login. Plain JavaScript, CSS, parameterized SQL, and no ORM.
+A simple React UI, Node.js/Express backend, and Microsoft SQL Server database.
+Supports login and creating, viewing, editing, and deleting students.
 
-## Local SQL Server on this Mac
+## Folders
 
-The dedicated Colima profile is `student-sql` (4 GB RAM, 20 GB virtual disk). Data lives in the Docker volume `student-sql-data`.
-
-```sh
-colima start student-sql
-npm run db:local
+```text
+UI/          React pages and CSS
+backend/     Express API, login, validation, and SQL queries
+DB/          SQL table definitions and database/account setup scripts
 ```
 
-The setup command creates `.env`, a local SQL Server container, database, exact student table, and a reviewer login. Generated secrets are saved only in ignored files with owner-only access. Find the initial app login in `.env.local-login.json`; do not share or commit this file. Re-running setup preserves existing data and credentials.
+## Requirements
 
-To stop the database VM: `colima stop student-sql`. Do not delete the profile or Docker volume if you need to keep the data.
+- Node.js 24 LTS and npm.
+- A running Microsoft SQL Server (Developer or Express edition is sufficient).
+- A SQL Server username/password with permission to create a development database and tables.
 
-## Fresh setup on another machine
+Use SQL Server authentication and enable TCP connections on port 1433. On Windows, SQL Server Configuration Manager manages TCP/IP settings. On macOS, connect to SQL Server in a Linux VM/container or on another machine; SQL Server has no native macOS installer. On the original development Mac, start the existing database with `colima start student-sql`.
 
-The current Mac is already configured; do not overwrite its `.env` file. Start it with `colima start student-sql` and `npm run dev`. The steps below are for a fresh setup.
+## Run locally
 
-1. Install dependencies: `npm install`.
-2. Copy `.env.example` to `.env` and enter your local SQL Server settings.
-3. Run `npm run db:migrate` to create the tables.
-4. Run `npm run user:create` to create a login (password entry is hidden).
-5. Optionally run `npm run db:seed` for three synthetic students.
-6. Run `npm run dev`, then open http://localhost:5173.
+Run every command below from the extracted project folder, where `package.json` is located. One install covers both UI and backend.
 
-The frontend uses port 5173 and proxies `/api` to Express on port 3000. The server requires a real SQL connection; no mock database or login bypass is enabled.
+**1. Install packages**
 
-## Structure
+```sh
+npm ci
+```
 
-- `client/src/App.jsx`: login, student list, form, and detail screens.
-- `client/src/styles.css`: responsive styling.
-- `server/src/app.js`: API routes, authentication, validation, and errors.
-- `server/src/store.js`: SQL queries.
-- `server/src/config.js`: environment configuration.
-- `database/migrations/001_initial.sql`: the student table specified by the task, plus Users and Sessions for login.
-- `server/scripts/`: migration, seed, and account management commands.
+**2. Configure your database**
 
-The student table uses INT IDENTITY for StudentId; NVARCHAR(100) for Name and Email; NVARCHAR(20) for Phone; NVARCHAR(50) for Department; and DATETIME for CreatedDate. All fields are required. Email uniqueness is an application design choice. Users can manage all shared student records.
+Copy `.env.example` to a new file named `.env` using your editor or file manager. Update `DB_SERVER`, `DB_PORT`, `DB_USER`, and `DB_PASSWORD` for your SQL Server. The default database name is `student_crud_dev`.
 
-## Security
+For a local SQL Server with a self-signed certificate, keep `DB_TRUST_CERTIFICATE=true`. Use `false` for a hosted server with a trusted certificate. The default `sa` example is for local development; do not use a database administrator account in a deployed app. Existing users of this project should keep their current `.env` file.
 
-Passwords use Argon2id. Random session tokens are sent in HttpOnly cookies; only token hashes are stored in SQL. Production cookies also require HTTPS. All student routes require authentication. Inputs are validated, queries use typed parameters, and mutation requests must match APP_ORIGIN. Login attempts are rate-limited in memory (limits reset on restart). Sessions expire after eight hours. Re-running `user:create` for an existing account can rotate its password and revoke sessions.
+**3. Create the database and tables**
 
-Use `DB_ADMIN_USER` and `DB_ADMIN_PASSWORD` only for setup commands. The application user should belong to the `student_app` role created by the migration. Local `.env` files are ignored by Git. Never commit credentials or share the database admin password.
+```sh
+npm run db:setup
+```
 
-## Checks
+This creates the configured database if needed and the `Students`, `Users`, and `Sessions` tables. It can run again without deleting existing records. `DB/schema.sql` contains the table definitions.
 
-- `npm test`: API behavior tests with an isolated in-memory test double; these do not prove SQL connectivity.
-- `npm run lint`: backend/config JavaScript lint.
-- `npm run build`: production React compilation.
-- `npm run test:sql`: real SQL create/read/update/delete check; creates and cleans up only its own unique test record.
-- `npm run test:e2e`: browser login and CRUD test while `npm run dev` is running; uses installed Google Chrome and the private local login file.
+**4. Create your app login**
 
-For a production build: `npm run build`, set `NODE_ENV=production` and an HTTPS `APP_ORIGIN`, then `npm start`. Express serves both the API and React build. Local development uses two processes via `npm run dev`.
+```sh
+npm run user:create
+```
 
-SQL Server on Apple Silicon requires unsupported x86 emulation. The local setup is for development only. See `SETUP_STATUS.md` for what has actually been installed and tested. Hosting and GitHub publication are separate from running the app locally.
+Enter an email and a password of 15–128 characters. Password input is hidden. These are your app login credentials, separate from your SQL Server credentials. There is no default password in the ZIP.
+
+**5. Add sample students (optional)**
+
+```sh
+npm run db:seed
+```
+
+**6. Start the project**
+
+```sh
+npm run dev
+```
+
+Open **http://localhost:5173** and sign in with the account you created. React uses port 5173 and Express uses port 3000. Use `localhost`, rather than `127.0.0.1`, in the browser. Press Ctrl+C to stop the app.
+
+## Build and run the built app
+
+```sh
+npm run build
+npm start
+```
+
+Open **http://localhost:3000**. Express now serves both the built UI and API. Stop `npm run dev` first so port 3000 is free. For this local run, leave `NODE_ENV=development`; production mode requires an HTTPS `APP_ORIGIN` and a trusted SQL certificate.
+
+## Student table
+
+| Field | SQL type |
+| --- | --- |
+| StudentId | INT IDENTITY, primary key |
+| Name | NVARCHAR(100) |
+| Email | NVARCHAR(100) |
+| Phone | NVARCHAR(20) |
+| Department | NVARCHAR(50) |
+| CreatedDate | DATETIME, generated by the database in UTC |
+
+All fields are required; email must be unique. ID and creation date cannot be edited. The two additional tables support login. Passwords are hashed, sessions use HttpOnly cookies, and all student queries use SQL parameters.
+
+## Quick check
+
+Sign in → Add student → View details → Edit → Refresh to confirm it saved → Delete → Sign out. Existing records should remain after restarting the app.
+
+If startup fails, check that SQL Server is running, TCP port 1433 is reachable, `.env` contains the right database credentials, and `npm run db:setup` completed. If ports 3000 or 5173 are already in use, stop the other app first.
+
+The ZIP contains source code, configuration examples, and the dependency lockfile. Passwords, `.env`, `node_modules`, build output, test tooling, and machine-specific installation files are excluded.

@@ -7,17 +7,12 @@
     "node": ">=24 <27"
   },
   "scripts": {
-    "dev": "concurrently -k \"node --env-file-if-exists=.env --watch server/src/index.js\" \"vite --config client/vite.config.js\"",
-    "build": "vite build --config client/vite.config.js",
-    "start": "node --env-file-if-exists=.env server/src/index.js",
-    "test": "node --test server/test/*.test.js",
-    "test:e2e": "playwright test",
-    "db:migrate": "node --env-file-if-exists=.env server/scripts/migrate.js",
-    "db:seed": "node --env-file-if-exists=.env server/scripts/seed.js",
-    "user:create": "node --env-file-if-exists=.env server/scripts/create-user.js",
-    "lint": "eslint .",
-    "db:local": "node server/scripts/local-setup.js",
-    "test:sql": "SQL_INTEGRATION=true node --env-file=.env --test server/test/sql.integration.test.js"
+    "dev": "concurrently -k \"node --env-file-if-exists=.env --watch backend/index.js\" \"vite --config UI/vite.config.js\"",
+    "build": "vite build --config UI/vite.config.js",
+    "start": "node --env-file-if-exists=.env backend/index.js --serve-ui",
+    "db:setup": "node --env-file-if-exists=.env DB/setup.js",
+    "db:seed": "node --env-file-if-exists=.env DB/seed.js",
+    "user:create": "node --env-file-if-exists=.env DB/create-user.js"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.9.0",
@@ -33,14 +28,8 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
-    "@playwright/test": "^1.56.0",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.0",
-    "eslint": "^9.38.0",
-    "globals": "^16.4.0",
-    "prettier": "^3.9.10",
-    "supertest": "^7.1.4",
     "vite": "^7.1.0"
   }
 }

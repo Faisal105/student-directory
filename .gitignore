@@ -1,9 +1,10 @@
 node_modules/
-client/dist/
+UI/dist/
 .env*
 !.env.example
 *.log
 tmp/
+output/
 test-results/
 playwright-report/
 .DS_Store

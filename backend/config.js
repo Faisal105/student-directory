@@ -6,8 +6,8 @@ export function config(env = process.env, operator = false) {
     (production && !origin.startsWith("https://"))
   )
     throw new Error("APP_ORIGIN must be an exact origin (HTTPS in production)");
-  const user = operator ? env.DB_ADMIN_USER : env.DB_USER;
-  const password = operator ? env.DB_ADMIN_PASSWORD : env.DB_PASSWORD;
+  const user = operator ? env.DB_ADMIN_USER || env.DB_USER : env.DB_USER;
+  const password = operator ? env.DB_ADMIN_PASSWORD || env.DB_PASSWORD : env.DB_PASSWORD;
   if (!env.DB_SERVER || !env.DB_NAME || !user || !password)
     throw new Error(
       `Missing database settings. Configure ${operator ? "DB_ADMIN_USER/DB_ADMIN_PASSWORD" : "DB_USER/DB_PASSWORD"}, DB_SERVER and DB_NAME in .env.`,

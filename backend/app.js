@@ -5,7 +5,7 @@ import { rateLimit } from "express-rate-limit";
 import { randomBytes, createHash, randomUUID } from "node:crypto";
 import argon2 from "argon2";
 import { ZodError } from "zod";
-import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   loginSchema,
   studentSchema,
@@ -179,10 +179,11 @@ export async function createApp({ store, settings }) {
   app.use("/api", (_req, res) =>
     fail(res, 404, "NOT_FOUND", "Endpoint not found."),
   );
-  if (settings.production) {
-    app.use(express.static(resolve("client/dist")));
+  if (settings.serveUI || settings.production) {
+    const uiDirectory = fileURLToPath(new URL("../UI/dist/", import.meta.url));
+    app.use(express.static(uiDirectory));
     app.get("/{*path}", (_req, res) =>
-      res.sendFile(resolve("client/dist/index.html")),
+      res.sendFile(fileURLToPath(new URL("../UI/dist/index.html", import.meta.url))),
     );
   }
   app.use((error, req, res, _next) => {
